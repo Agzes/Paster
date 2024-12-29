@@ -12,10 +12,14 @@ HotKeyStatus := true
 CurrentPage := "P01"
 Font := "Segoe UI"
 global bind := "!v"
+global to_tray := 0
 status := 0
 FontSize := 9
 try {
     global bind := RegRead("HKEY_CURRENT_USER\Software\Agzes\Paster", "bind")
+}
+try {
+    global to_tray := RegRead("HKEY_CURRENT_USER\Software\Agzes\Paster", "to_tray")
 }
 
 SetWindowColor(hwnd, titleText?, titleBackground?, border?)
@@ -79,7 +83,7 @@ ButtonStyles["secondary"] := [[0xFF234125, 0xFF1B3019, 0xFFFFFFFF, 3, 0xFF1B3019
     [0xFF2D5230, 0xFF234125, 0xFFFFFFFF, 3, 0xFF234125, 1],
     [0xFF386A3C, 0xFF2D5230, 0xFFFFFFFF, 3, 0xFF2D5230, 1]]
 
-MainUI := GuiExt("", "V.0.1 \ Paster \ by Agzes")
+MainUI := GuiExt("", "V.0.1.1 \ Paster \ by Agzes")
 MainUI.SetFont("cWhite s" FontSize, Font)
 MainUI.BackColor := 0x171717
 CreateImageButton("SetDefGuiColor", 0x171717)
@@ -110,7 +114,24 @@ UpdateCounter(*) {
 
 INPUT.OnEvent("Change", UpdateCounter)
 
+STB06 := MainUI.AddButton("x508 y75 w120 h36 0x100 Disabled", "")
+CreateImageButton(STB06, 0, ButtonStyles["fake_for_group"]*)
 
+save_to_tray(*) {   
+    RegWrite(CTTValue.Value, "REG_SZ", "HKEY_CURRENT_USER\Software\Agzes\Paster", "to_tray")
+}
+
+SGW := SysGet(SM_CXMENUCHECK := 71)
+SGH := SysGet(SM_CYMENUCHECK := 72)
+CTTValue := MainUI.AddCheckBox("x512 y78 h" SGH " w" SGW)
+CTTValue.Value := to_tray
+CTTValue.OnEvent("Click", save_to_tray)
+CTTLabel := MainUI.AddText("x527 y78 0x200 h" SGH, " Close To Tray")
+
+SGW1 := SysGet(SM_CXMENUCHECK := 71)
+SGH1 := SysGet(SM_CYMENUCHECK := 72)
+TFCValue := MainUI.AddCheckBox(" x512 y93 h" SGH1 " w" SGW1)
+TFCLabel := MainUI.AddText("x527 y93 0x200 h" SGH1, " Text From Copy")
 
 STB05 := MainUI.AddButton("x508 y115 w120 h77 0x100 Disabled", "") 
 CreateImageButton(STB05, 0, ButtonStyles["fake_for_group"]*)
@@ -310,6 +331,9 @@ stop_this(*) {
 }
 
 start_write(ui?, *) {
+    if TFCValue.Value
+        INPUT.Value := A_Clipboard
+
     if ui {
         if bind != "^s" {
             ToolTip("Click Ctrl+S for stop")
@@ -326,7 +350,7 @@ start_write(ui?, *) {
         next_write(false)
     }
         
-        
+
 }
   
 next_write(ui?, *) {
@@ -349,5 +373,17 @@ next_write(ui?, *) {
     CreateImageButton(StartButton, 0, ButtonStyles["reset"]*)
     TypeText(text, SpeedSlider.Value, Floor(SpeedSlider.Value / 2), SmartValue.Value)
 }
+
+CloseEvent(*) {
+    if CTTValue.Value {
+        MainUI.Hide()
+        MsgBox("To close the program, right-click on the tray icon and click `"Exit`". `nTo open UI, just run app again.", "v.0.1.1 \ Paster \ by Agzes")
+    } else {
+        ExitApp()
+    }
+}
+
+
+MainUI.OnEvent('Close', (*) => CloseEvent())
 
 Hotkey(bind, start_write_non_ui)
