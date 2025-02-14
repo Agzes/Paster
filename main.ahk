@@ -83,7 +83,7 @@ ButtonStyles["secondary"] := [[0xFF234125, 0xFF1B3019, 0xFFFFFFFF, 3, 0xFF1B3019
     [0xFF2D5230, 0xFF234125, 0xFFFFFFFF, 3, 0xFF234125, 1],
     [0xFF386A3C, 0xFF2D5230, 0xFFFFFFFF, 3, 0xFF2D5230, 1]]
 
-MainUI := GuiExt("", "V.0.1.1 \ Paster \ by Agzes")
+MainUI := GuiExt("", "V.0.1.2 \ Paster \ by Agzes")
 MainUI.SetFont("cWhite s" FontSize, Font)
 MainUI.BackColor := 0x171717
 CreateImageButton("SetDefGuiColor", 0x171717)
@@ -114,12 +114,17 @@ UpdateCounter(*) {
 
 INPUT.OnEvent("Change", UpdateCounter)
 
-STB06 := MainUI.AddButton("x508 y75 w120 h36 0x100 Disabled", "")
+STB06 := MainUI.AddButton("x508 y60 w120 h52 0x100 Disabled", "")
 CreateImageButton(STB06, 0, ButtonStyles["fake_for_group"]*)
 
 save_to_tray(*) {   
     RegWrite(CTTValue.Value, "REG_SZ", "HKEY_CURRENT_USER\Software\Agzes\Paster", "to_tray")
 }
+
+SGW2 := SysGet(SM_CXMENUCHECK := 71)
+SGH2 := SysGet(SM_CYMENUCHECK := 72)
+ShiftEnter := MainUI.AddCheckBox("x512 y63 h" SGH2 " w" SGW2)
+ShiftEnterLabel := MainUI.AddText("x527 y63 0x200 h" SGH2, " Shift + Enter")
 
 SGW := SysGet(SM_CXMENUCHECK := 71)
 SGH := SysGet(SM_CYMENUCHECK := 72)
@@ -304,7 +309,10 @@ TypeText(text, normalDelay, shortDelay, smart) {
         if (c = " " || c = "`n") {
             Sleep RandDelay(shortDelay)
             if (c = "`n") {
-                Send "{Enter}"
+                if ShiftEnter.Value
+                    Send "+{Enter}" 
+                else 
+                    Send "{Enter}"
                 continue
             }
             Send c
@@ -316,7 +324,6 @@ TypeText(text, normalDelay, shortDelay, smart) {
         }
     }
 
-    
     ToolTip("")
     global status := 0
     StartButton.Text := "START"
@@ -377,7 +384,7 @@ next_write(ui?, *) {
 CloseEvent(*) {
     if CTTValue.Value {
         MainUI.Hide()
-        MsgBox("To close the program, right-click on the tray icon and click `"Exit`". `nTo open UI, just run app again.", "v.0.1.1 \ Paster \ by Agzes")
+        MsgBox("To close the program, right-click on the tray icon and click `"Exit`". `nTo open UI, just run app again.", "v.0.1.2 \ Paster \ by Agzes")
     } else {
         ExitApp()
     }

@@ -1,3 +1,7 @@
+; Credits:
+; Nikola Perovic - https://github.com/nperovic
+; https://github.com/nperovic/GuiEnhancerKit
+
 /************************************************************************
  * @description Elevate your AHK Gui development with extended methods and properties.  
  * @file GuiEnhancerKit.ahk
@@ -273,7 +277,7 @@ class GuiExt extends Gui
         static SetClrMap := Map(DWMWA_BORDER_COLOR, "border", DWMWA_CAPTION_COLOR, "titleBackground", DWMWA_TEXT_COLOR, "titleText")
 
         if (VerCompare(A_OSVersion, "10.0.22200") < 0)
-            throw ; OSError("This is supported starting with Windows 11 Build 22000.")
+            throw OSError("This is supported starting with Windows 11 Build 22000.")
 
         for attr, var in SetClrMap
             if (%var% ?? 0)
